@@ -1,51 +1,64 @@
-import { Link } from 'react-router-dom';
+import { useMemo } from 'react';
 
-import { Box, Button } from '@/components/Common';
 import {
   CardBox,
-  CardNumberInputBox,
-  CardExpirationInputBox,
-  CardSecretCodeInputBox,
-  CardPasswordInputBox,
-  CardOwnerNameInputBox,
-} from '@/components/Card';
-
-import { useCardNumber, useCardExpiration, useCardOwnerName } from '@/hooks/card';
+  NumberInputBox,
+  ExpirationInputBox,
+  SecretCodeInputBox,
+  PasswordInputBox,
+  OwnerNameInputBox,
+  NextButtonBox,
+  TitleBox,
+  CardSelectModal,
+  CardSelectButton,
+} from '@/components/CardAdd';
+import {
+  useCardNumber,
+  useCardExpiration,
+  useCardOwnerName,
+  useCardSelectModal,
+  useCardSecretCode,
+  useCardPassword,
+} from '@/hooks/card';
 
 export default function CardAdd() {
-  const { cardNumber, handleChangeCardNumber } = useCardNumber();
-  const { cardExpiration, handleChangeExpiration } = useCardExpiration();
+  const { cardNumber, 카드번호가모두입력된, handleChangeCardNumber } = useCardNumber();
+  const { cardExpiration, 만료일이모두입력된, handleChangeExpiration } = useCardExpiration();
   const { cardOwnerName, handleChangeCardOwnerName } = useCardOwnerName();
+  const { cardSecretCode, 카드CVC가모두입력된, handleChangeCardSecretCode } = useCardSecretCode();
+  const { cardPassword, 카드비밀번호가모두입력된, handleChangeCardPassword } = useCardPassword();
+  const { isModalOpen, selectedCard, 카드사가선택된, handleClickOpenModal, handleClickCloseModal, handleClickCard } =
+    useCardSelectModal();
+
+  const isCompleted = useMemo(() => {
+    return [
+      카드번호가모두입력된,
+      만료일이모두입력된,
+      카드CVC가모두입력된,
+      카드비밀번호가모두입력된,
+      카드사가선택된,
+    ].every((elem) => elem === true);
+  }, [만료일이모두입력된, 카드CVC가모두입력된, 카드번호가모두입력된, 카드비밀번호가모두입력된, 카드사가선택된]);
 
   return (
-    <div>
-      <div className="root">
-        <div className="app">
-          <h2 className="page-title">
-            <Link to="/">&lt;</Link>
-            <div className="ml-5">카드 추가</div>
-          </h2>
-          <CardBox cardNumber={cardNumber} cardExpiration={cardExpiration} cardOwnerName={cardOwnerName} />
-
-          <CardNumberInputBox cardNumber={cardNumber} onChange={handleChangeCardNumber} />
-
-          <CardExpirationInputBox cardExpiration={cardExpiration} onChange={handleChangeExpiration} />
-
-          <CardOwnerNameInputBox cardOwnerName={cardOwnerName} onChange={handleChangeCardOwnerName} />
-
-          <CardSecretCodeInputBox />
-
-          <CardPasswordInputBox />
-
-          <Box className="button-box">
-            <Link to="/card-completed">
-              <Button type="button" className="button-text">
-                다음
-              </Button>
-            </Link>
-          </Box>
-        </div>
-      </div>
+    <div className="root">
+      <form className="app">
+        {isModalOpen && <CardSelectModal onClick={handleClickCard} onCloseModal={handleClickCloseModal} />}
+        <TitleBox />
+        <CardBox
+          cardNumber={cardNumber}
+          cardExpiration={cardExpiration}
+          cardOwnerName={cardOwnerName}
+          selectedCard={selectedCard}
+        />
+        <CardSelectButton onClick={handleClickOpenModal} />
+        <NumberInputBox cardNumber={cardNumber} onChange={handleChangeCardNumber} />
+        <ExpirationInputBox cardExpiration={cardExpiration} onChange={handleChangeExpiration} />
+        <OwnerNameInputBox cardOwnerName={cardOwnerName} onChange={handleChangeCardOwnerName} />
+        <SecretCodeInputBox cardSecretCode={cardSecretCode} onChange={handleChangeCardSecretCode} />
+        <PasswordInputBox cardPassword={cardPassword} onChange={handleChangeCardPassword} />
+        <NextButtonBox isCompleted={isCompleted} />
+      </form>
     </div>
   );
 }

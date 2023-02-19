@@ -1,19 +1,18 @@
-import { PropsWithChildren } from 'react';
+import { ElementType, PropsWithChildren } from 'react';
 
-type InputBoxProps = {
-  title?: string;
-  subTitle?: string;
-  className: string;
+type BoxProps<T extends ElementType> = {
+  as?: T;
+
+  className?: string;
 };
 
-export default function Box({ title, subTitle, className, children }: PropsWithChildren<InputBoxProps>) {
-  return (
-    <div className={className}>
-      <div className="flex-between">
-        {title && <span className="input-title">{title}</span>}
-        {subTitle && <span className="input-title">{subTitle}</span>}
-      </div>
-      {children}
-    </div>
-  );
+export default function Box<T extends ElementType = 'div'>({
+  as,
+
+  className,
+  children,
+}: PropsWithChildren<BoxProps<T>>) {
+  const Element = as || 'div';
+
+  return <Element className={className}>{children}</Element>;
 }
