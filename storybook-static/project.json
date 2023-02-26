@@ -1,5 +1,5 @@
 {
-  "generatedAt": 1677441776012,
+  "generatedAt": 1677442703342,
   "builder": { "name": "@storybook/builder-vite" },
   "hasCustomBabel": false,
   "hasCustomWebpack": false,
