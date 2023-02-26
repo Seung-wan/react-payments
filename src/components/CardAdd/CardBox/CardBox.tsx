@@ -1,20 +1,26 @@
 import { useMemo } from 'react';
 
 import { CARD } from '@/constants/card';
-import { isShowHyphen, maskingNumber } from '@/domain/card';
-import { CardExpiration, CardNumber, CardOwnerName, SelectedCard } from '@/types/card';
+import {
+  useCardExpirationContext,
+  useCardNumberContext,
+  useCardOwnerNameContext,
+  useCardSelectModalContext,
+} from '@/context';
 
-type CardBoxProps = {
-  cardNumber: CardNumber;
-  cardExpiration: CardExpiration;
-  cardOwnerName: CardOwnerName;
-  selectedCard: SelectedCard;
-};
+import { isShowHyphen, maskingNumber } from '@/domain/card/card';
 
-export default function CardBox({ cardNumber, cardExpiration, cardOwnerName, selectedCard }: CardBoxProps) {
-  const { num1, num2, num3, num4 } = cardNumber;
-  const { month, year } = cardExpiration;
-  const { name, color } = selectedCard;
+export default function CardBox() {
+  const {
+    cardNumber: { num1, num2, num3, num4 },
+  } = useCardNumberContext();
+  const {
+    cardExpiration: { month, year },
+  } = useCardExpirationContext();
+  const {
+    selectedCard: { name, color },
+  } = useCardSelectModalContext();
+  const { cardOwnerName } = useCardOwnerNameContext();
 
   const cardStyle = useMemo(() => {
     return { backgroundColor: color };
@@ -41,7 +47,7 @@ export default function CardBox({ cardNumber, cardExpiration, cardOwnerName, sel
         </div>
         <div className="card-bottom">
           <div className="card-bottom__info">
-            <span className="card-text card-text__ellipsis">{cardOwnerName || CARD.OWNER_NAME.PLACEHOLDER}</span>
+            <span className="card-text card-text__ellipsis_small">{cardOwnerName || CARD.OWNER_NAME.PLACEHOLDER}</span>
             <span className="card-text">
               {month || CARD.EXPIRATION.PLACEHOLDER.MONTH} / {year || CARD.EXPIRATION.PLACEHOLDER.YEAR}
             </span>
