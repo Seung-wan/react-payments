@@ -1,6 +1,8 @@
+import { CARD } from '@/constants/card';
 import { ERROR_MESSAGE } from '@/constants/errorMessage';
-import { CardExpiration, CardNumber, CardPassword } from '@/types/card';
+import { Card, CardExpiration, CardNumber, CardPassword, CardSecretCode } from '@/types/card';
 import { getCurrentYear, isNumber } from '@/utils';
+import { assert } from '@/utils/validation';
 
 type ValidateInput = {
   name: string;
@@ -47,20 +49,13 @@ export function validateCardExpiration({
 }: {
   cardExpiration: CardExpiration;
 } & ValidateInput) {
-  if (!(name in cardExpiration)) {
-    throw new Error(ERROR_MESSAGE.INPUT.COMMON.INVALID_NAME(name));
-  }
+  assert(name in cardExpiration, ERROR_MESSAGE.INPUT.COMMON.INVALID_NAME(name));
 
-  if (!isNumber(value) && value !== '') {
-    throw new Error(ERROR_MESSAGE.INPUT.COMMON.INVALID_VALUE);
-  }
+  assert(isNumber(value) || value === '', ERROR_MESSAGE.INPUT.COMMON.INVALID_VALUE);
 
-  if (name === 'month' && !isValidExpirationMonth(value)) {
-    throw new Error(ERROR_MESSAGE.INPUT.EXPIRATION.INVALID_MONTH);
-  }
-  if (name === 'year' && !isValidExpirationYear(value)) {
-    throw new Error(ERROR_MESSAGE.INPUT.EXPIRATION.INVALID_YEAR);
-  }
+  assert(name !== 'month' || isValidExpirationMonth(value), ERROR_MESSAGE.INPUT.EXPIRATION.INVALID_MONTH);
+
+  assert(name !== 'year' || isValidExpirationYear(value), ERROR_MESSAGE.INPUT.EXPIRATION.INVALID_YEAR);
 }
 
 export function validateCardNumber({
@@ -70,20 +65,38 @@ export function validateCardNumber({
 }: {
   cardNumber: CardNumber;
 } & ValidateInput) {
-  if (!(name in cardNumber)) {
-    throw new Error(ERROR_MESSAGE.INPUT.COMMON.INVALID_NAME(name));
-  }
+  assert(name in cardNumber, ERROR_MESSAGE.INPUT.COMMON.INVALID_NAME(name));
 
-  if (!isNumber(value) && value !== '') {
-    throw new Error(ERROR_MESSAGE.INPUT.COMMON.INVALID_VALUE);
-  }
+  assert(isNumber(value) || value === '', ERROR_MESSAGE.INPUT.COMMON.INVALID_VALUE);
 }
 
 export function validateCardPassword({ name, value, cardPassword }: { cardPassword: CardPassword } & ValidateInput) {
-  if (!(name in cardPassword)) {
-    throw new Error(ERROR_MESSAGE.INPUT.COMMON.INVALID_NAME(name));
-  }
-  if (!isNumber(value) && value !== '') {
-    throw new Error(ERROR_MESSAGE.INPUT.COMMON.INVALID_VALUE);
-  }
+  assert(name in cardPassword, ERROR_MESSAGE.INPUT.COMMON.INVALID_NAME(name));
+
+  assert(isNumber(value) || value === '', ERROR_MESSAGE.INPUT.COMMON.INVALID_VALUE);
+}
+
+export function validateCardSecretCode(value: ValidateInput['value']) {
+  assert(isNumber(value) || value === '', ERROR_MESSAGE.INPUT.COMMON.INVALID_VALUE);
+}
+
+export function validateCardForm({
+  type,
+  name,
+  value,
+  cardForm,
+}: {
+  type: string;
+  cardForm: Card;
+} & ValidateInput) {
+  const { cardNumber, cardExpiration, cardPassword } = cardForm;
+
+  const validate = {
+    [CARD.NUMBER.TYPE]: () => validateCardNumber({ name, value, cardNumber }),
+    [CARD.EXPIRATION.TYPE]: () => validateCardExpiration({ name, value, cardExpiration }),
+    [CARD.PASSWORD.TYPE]: () => validateCardPassword({ name, value, cardPassword }),
+    [CARD.SECRET_CODE.TYPE]: () => validateCardSecretCode(value),
+  }[type];
+
+  validate?.();
 }
